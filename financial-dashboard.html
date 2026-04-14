@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Financial Planner — Smoke Family</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0A0E17;--bg2:#0F1420;--surface:#151B2B;--surface2:#1C2438;--border:#262F48;--border-lit:#3A466A;--text:#E4E8F1;--text2:#8892AB;--text3:#5C6580;--green:#34D399;--green-bg:rgba(52,211,153,0.08);--red:#FB7185;--red-bg:rgba(251,113,133,0.08);--amber:#FBBF24;--amber-bg:rgba(251,191,36,0.08);--blue:#60A5FA;--blue-bg:rgba(96,165,250,0.08);--radius:16px;--radius-sm:10px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+h1,h2,h3{font-family:'Instrument Serif',serif}
+code{font-family:'Geist Mono',monospace}
+.app{max-width:1400px;margin:0 auto;padding:24px 20px 80px}
+.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:16px}
+.hdr h1{font-size:30px;font-weight:400;letter-spacing:-0.3px}.hdr h1 em{font-style:italic;color:var(--green)}
+.hdr-r{display:flex;align-items:center;gap:12px}
+.hdr-r select{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;padding:9px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;outline:none}
+.hdr-badge{font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;background:var(--green-bg);color:var(--green);border:1px solid rgba(52,211,153,0.2)}
+.tabs{display:flex;gap:2px;margin-bottom:28px;border-bottom:1px solid var(--border)}
+.tab{font-size:13px;font-weight:600;padding:10px 22px 12px;border:none;background:none;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;position:relative;bottom:-1px}
+.tab:hover{color:var(--text2)}.tab.on{color:var(--green);border-bottom-color:var(--green)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--border-lit),transparent)}
+.card-t{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.4px;color:var(--text3);margin-bottom:6px}
+.card-v{font-family:'Instrument Serif',serif;font-size:34px;font-weight:400}
+.card-sub{font-size:12px;color:var(--text2);margin-top:6px}
+.badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px}
+.bg{background:var(--green-bg);color:var(--green)}.br{background:var(--red-bg);color:var(--red)}.ba{background:var(--amber-bg);color:var(--amber)}.bb{background:var(--blue-bg);color:var(--blue)}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.sec{display:none}.sec.on{display:block;animation:fadeUp .25s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.cr{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}.cr:last-child{border:none}
+.cd{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.cn{font-size:13px;font-weight:500;min-width:110px}
+.cb{flex:1;height:5px;background:var(--bg2);border-radius:3px;overflow:hidden}
+.cf{height:100%;border-radius:3px;transition:width .5s ease}
+.ca{font-size:13px;font-weight:600;font-family:'Geist Mono',monospace;min-width:70px;text-align:right}
+.cp{font-size:11px;color:var(--text3);min-width:42px;text-align:right}
+.sg{margin-bottom:16px}
+input[type=range]{display:none}
+.tr{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);font-size:13px}.tr:last-child{border:none}
+.tr .tr-info{font-size:11px;color:var(--text3);margin-top:2px}
+.tg{width:42px;height:22px;border-radius:11px;background:var(--bg2);border:1px solid var(--border);cursor:pointer;position:relative;transition:all .2s;flex-shrink:0}
+.tg.on{background:var(--green);border-color:var(--green)}
+.tg::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s}
+.tg.on::after{transform:translateX(20px)}
+.res{background:linear-gradient(135deg,var(--surface2),var(--surface));border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:center;margin-bottom:12px}
+.res .big{font-family:'Instrument Serif',serif;font-size:38px;font-weight:400}
+.res .sub{font-size:12px;color:var(--text2);margin-top:4px}
+.uz{border:2px dashed var(--border);border-radius:var(--radius);padding:48px 24px;text-align:center;cursor:pointer;transition:all .2s}
+.uz:hover{border-color:var(--green);background:var(--green-bg)}
+.insight{display:flex;gap:12px;padding:14px 16px;background:var(--surface2);border-radius:var(--radius-sm);margin-bottom:8px;font-size:13px;line-height:1.55}.insight:last-child{margin-bottom:0}
+.ii{font-size:18px;flex-shrink:0;margin-top:1px}
+.ef{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.ef input{font-family:'Geist Mono',monospace;font-size:13px;font-weight:600;background:var(--surface2);border:1px solid var(--border);color:var(--green);padding:6px 10px;border-radius:6px;width:100px;outline:none}
+.ef input:focus{border-color:var(--green)}
+.ef label{font-size:12px;color:var(--text3);min-width:130px}
+.inc-split{display:flex;gap:16px;margin-top:8px;font-size:12px;color:var(--text2)}
+.inc-split span{display:flex;align-items:center;gap:4px}
+.inc-dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+.section-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--blue);margin-bottom:12px;margin-top:4px}
+.breakdown{font-size:12px;color:var(--text2);line-height:1.8;margin-top:8px;padding:12px;background:var(--bg2);border-radius:var(--radius-sm)}
+.breakdown .row{display:flex;justify-content:space-between}
+.breakdown .row.total{color:var(--text);font-weight:700;border-top:1px solid var(--border);padding-top:6px;margin-top:4px}
+.breakdown .row.income{color:var(--green)}
+.breakdown .row.expense{color:var(--red)}
+@media(max-width:960px){.g4{grid-template-columns:repeat(2,1fr)}.g2{grid-template-columns:1fr}}
+@media(max-width:600px){.g4{grid-template-columns:1fr}.app{padding:14px 10px 40px}.hdr h1{font-size:24px}.card-v{font-size:28px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hdr">
+    <h1>Financial <em>Planner</em></h1>
+    <div class="hdr-r">
+      <div class="hdr-badge">51 months · Jan 2022 – Mar 2026</div>
+      <select id="rangeSelect" onchange="changeRange()"><option value="6">Last 6 months</option><option value="12" selected>Last 12 months</option><option value="24">Last 24 months</option><option value="0">All time</option></select>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab on" onclick="go('overview',this)">Overview</button>
+    <button class="tab" onclick="go('spending',this)">Spending</button>
+    <button class="tab" onclick="go('scenarios',this)">Scenarios</button>
+    <button class="tab" onclick="go('upload',this)">Upload Data</button>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div id="overview" class="sec on">
+    <div class="g4">
+      <div class="card"><div class="card-t">Avg Monthly Income</div><div class="card-v" id="kI">—</div><div class="inc-split"><span><span class="inc-dot" style="background:#38BDF8"></span> Steven: <b id="kIS">—</b></span><span><span class="inc-dot" style="background:#F0ABFC"></span> Amy: <b id="kIA">—</b></span></div></div>
+      <div class="card"><div class="card-t">Avg Monthly Spending</div><div class="card-v" id="kS">—</div><div class="card-sub" id="kSd"></div></div>
+      <div class="card"><div class="card-t">Avg Net Savings</div><div class="card-v" id="kN">—</div><div class="card-sub" id="kNd"></div></div>
+      <div class="card"><div class="card-t">House Fund</div><div class="card-v" id="kH">—</div><div class="card-sub" id="kHd"></div></div>
+    </div>
+    <div class="g2">
+      <div class="card"><div class="card-t">Income vs Spending</div><canvas id="cTrend" height="230"></canvas></div>
+      <div class="card"><div class="card-t">Monthly Savings Rate</div><canvas id="cRate" height="230"></canvas></div>
+    </div>
+    <div class="card" style="margin-bottom:20px"><div class="card-t">Insights</div><div id="insBox"></div></div>
+  </div>
+
+  <!-- SPENDING -->
+  <div id="spending" class="sec">
+    <div class="g2">
+      <div class="card"><div class="card-t">Avg Monthly Spending by Category</div><canvas id="cCat" height="300"></canvas></div>
+      <div class="card"><div class="card-t">Breakdown</div><div id="catList"></div></div>
+    </div>
+    <div class="card"><div class="card-t">Top Category Trends</div><canvas id="cCatTrend" height="260"></canvas></div>
+  </div>
+
+  <!-- SCENARIOS -->
+  <div id="scenarios" class="sec">
+    <div class="g2" style="align-items:start">
+      <div class="card" style="padding:20px">
+        <h3 style="font-size:20px;font-weight:400;margin-bottom:16px">Scenario <em style="color:var(--green)">Builder</em></h3>
+
+        <div class="section-label">🏠 Purchase Details</div>
+        <div class="ef"><label>House price:</label><input type="text" id="sHP" value="600,000" oninput="updateSc()"></div>
+        <div class="ef"><label>Down payment %:</label><input type="text" id="sDP" value="50" oninput="updateSc()" style="width:60px"></div>
+        <div class="ef"><label>Mortgage rate %:</label><input type="text" id="sMR" value="6.5" oninput="updateSc()" style="width:60px"></div>
+        <div class="ef"><label>Closing costs %:</label><input type="text" id="sCC" value="3" oninput="updateSc()" style="width:60px"></div>
+        <div class="ef"><label>Move-in / furnishing:</label><input type="text" id="fMoveIn" value="15,000" oninput="updateSc()"></div>
+        <div class="ef"><label>House fund balance:</label><input type="text" id="fundBal" value="164,000" oninput="updateSc()"></div>
+
+        <hr class="divider">
+        <div class="section-label">📍 Target Town</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px" id="townBtns"></div>
+        <div id="townInfo" style="font-size:12px;color:var(--text2);line-height:1.5;padding:8px;background:var(--bg2);border-radius:8px"></div>
+
+        <hr class="divider">
+        <div class="section-label">💰 Savings & Income</div>
+        <div class="ef"><label>Monthly savings:</label><input type="text" id="sMS" value="2,500" oninput="updateSc()"></div>
+        <div class="ef"><label>Steven gross salary:</label><input type="text" id="sGross" value="140,000" oninput="updateSc()"></div>
+        <div class="ef"><label>Amy gross salary:</label><input type="text" id="sAmyGross" value="85,000" oninput="updateSc()"></div>
+        <div class="ef"><label>Steven 401k %:</label><input type="text" id="s401k" value="12" oninput="updateSc()" style="width:60px"></div>
+
+        <hr class="divider">
+        <div class="section-label">🏡 Current Home — Milltown</div>
+        <div class="tr" style="border:none;padding-bottom:4px">
+          <div><span>What to do with Milltown house?</span></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <button class="tab-btn" id="btnSell" onclick="setMilltown('sell')" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--green);color:#0A0E17;font-weight:700;font-size:12px;cursor:pointer;font-family:'DM Sans'">Sell ($540K)</button>
+          <button class="tab-btn" id="btnRent" onclick="setMilltown('rent')" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-weight:700;font-size:12px;cursor:pointer;font-family:'DM Sans'">Rent Out</button>
+          <button class="tab-btn" id="btnNeither" onclick="setMilltown('neither')" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-weight:700;font-size:12px;cursor:pointer;font-family:'DM Sans'">Keep Both</button>
+        </div>
+        <div id="milltownInfo" style="font-size:12px;color:var(--text2);line-height:1.6;padding:8px;background:var(--bg2);border-radius:8px"></div>
+
+        <hr class="divider">
+        <div class="section-label">👨‍👩‍👧 Life Changes</div>
+        <div class="tr"><div><span>Amy stops working</span><div class="tr-info">Tax-adjusted net impact + eliminates current childcare</div></div><div class="tg" id="tSpouse" onclick="tgl(this);updateSc()"></div></div>
+        <div class="tr"><div><span>Add another child</span><div class="tr-info" id="childCostInfo">Adjusts based on whether Amy works</div></div><div class="tg" id="tChild" onclick="tgl(this);updateSc()"></div></div>
+        <div class="tr"><div><span>Cut dining & shopping 40%</span><div class="tr-info">Based on your actual spending averages</div></div><div class="tg" id="tCut" onclick="tgl(this);updateSc()"></div></div>
+      </div>
+
+      <div>
+        <div class="res"><div class="card-t">Total Cash Needed</div><div class="big" id="rTotal">—</div><div class="sub" id="rTotalS"></div></div>
+        <div class="res"><div class="card-t">Time to Goal</div><div class="big" id="rMo">—</div><div class="sub" id="rMos"></div></div>
+        <div class="res"><div class="card-t">Monthly Housing Cost (New Home)</div><div class="big" id="rMt">—</div><div class="sub" id="rMts"></div></div>
+        <div class="res"><div class="card-t">Post-Purchase Monthly Cash Flow</div><div class="big" id="rCF">—</div><div class="sub" id="rCFs"></div></div>
+
+        <div class="card" style="margin-top:12px">
+          <div class="card-t">Cash Flow Breakdown</div>
+          <div class="breakdown" id="cfBreakdown"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px"><div class="card-t">Savings Projection</div><canvas id="cProj" height="240"></canvas></div>
+  </div>
+
+  <!-- UPLOAD -->
+  <div id="upload" class="sec">
+    <div class="card" style="margin-bottom:20px">
+      <h3 style="font-size:18px;font-weight:400;margin-bottom:10px">Upload <em style="color:var(--green)">Simplifi</em> CSV</h3>
+      <p style="font-size:13px;color:var(--text2);line-height:1.7">Paychecks from RWJBarnabas (Steven) and Nisource (Amy) are always counted regardless of Simplifi's exclusion flag.</p>
+    </div>
+    <div class="uz" id="dz" onclick="document.getElementById('fi').click()">
+      <h3 style="font-size:18px;font-weight:400;margin-bottom:6px">📁 Drop CSV here</h3>
+      <p style="font-size:13px;color:var(--text3)">or click to browse</p>
+      <input type="file" id="fi" accept=".csv" style="display:none" onchange="handleFile(this.files[0])">
+    </div>
+    <div id="upSt" style="display:none;margin-top:16px" class="card"></div>
+    <div class="card" style="margin-top:16px"><div class="card-t">Data Status</div><p id="dStat" style="font-size:13px;color:var(--text2);padding:4px 0">51 months of Simplifi data loaded. Paycheck exclusion override active.</p></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const RAW={"months":["2022-01","2022-02","2022-03","2022-04","2022-05","2022-06","2022-07","2022-08","2022-09","2022-10","2022-11","2022-12","2023-01","2023-02","2023-03","2023-04","2023-05","2023-06","2023-07","2023-08","2023-09","2023-10","2023-11","2023-12","2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03"],"labels":["Jan 22","Feb 22","Mar 22","Apr 22","May 22","Jun 22","Jul 22","Aug 22","Sep 22","Oct 22","Nov 22","Dec 22","Jan 23","Feb 23","Mar 23","Apr 23","May 23","Jun 23","Jul 23","Aug 23","Sep 23","Oct 23","Nov 23","Dec 23","Jan 24","Feb 24","Mar 24","Apr 24","May 24","Jun 24","Jul 24","Aug 24","Sep 24","Oct 24","Nov 24","Dec 24","Jan 25","Feb 25","Mar 25","Apr 25","May 25","Jun 25","Jul 25","Aug 25","Sep 25","Oct 25","Nov 25","Dec 25","Jan 26","Feb 26","Mar 26"],"income":[17872,10994,12530,24365,10877,14769,10541,11826,11463,12185,12685,45085,13879,14375,12212,13699,13250,16475,15005,11111,12332,14842,15408,17798,12020,19282,12602,12488,15768,14743,12267,14433,13191,26057,16580,9787,12200,22182,12888,13303,16211,12639,12607,12717,13227,17596,13010,16737,12517,19121,12693],"spending":[10375,9926,9608,4675,10296,10503,7133,6184,9115,62655,7989,44882,8119,9990,11914,8419,7328,12919,15556,14943,50416,13673,9963,11506,7859,8531,9740,11203,8206,8394,9329,10665,6744,13436,8105,11490,9225,20167,9428,13532,8728,8062,11231,11976,9896,7602,9647,10772,8580,12339,13235],"categories":{"Auto & Transport":[0,636,8,130,76,1409,523,462,593,541,484,645,1063,1057,1242,543,1459,1437,1010,1764,1065,1131,1150,928,1031,2253,977,1248,1178,931,2092,1916,400,1040,715,1246,580,2412,1274,2332,1159,1095,510,2231,673,515,750,1037,524,2557,934],"Dining":[171,144,165,235,312,434,204,552,561,204,306,423,513,494,484,680,468,798,1923,835,1248,869,637,715,963,960,529,611,499,460,350,547,415,2428,249,524,346,2455,473,384,500,250,504,1102,410,442,439,668,197,576,566],"Education":[10,10,10,10,10,10,10,29,10,0,21,121,0,37,10,10,0,2220,2220,0,39365,897,0,0,0,0,0,0,0,0,32,2220,0,3818,0,0,788,0,35,0,70,140,140,175,140,0,0,0,0,0,76],"Entertainment":[56,249,31,110,63,130,68,63,31,31,142,145,79,125,343,120,121,388,84,77,295,104,143,124,34,397,58,59,87,12,46,13,310,13,148,385,248,420,348,95,57,13,40,524,283,137,247,21,53,75,42],"Financial":[5300,4300,1300,300,300,1300,300,300,300,53359,3300,4300,300,300,300,800,300,1300,1300,2300,594,314,319,0,0,0,300,532,0,0,1000,0,275,0,47,339,610,600,600,832,300,327,300,624,619,600,600,300,600,616,655],"Gifts":[69,0,10,0,23,0,0,150,1,168,88,110,10,19,0,132,125,42,0,150,4,125,61,105,88,75,170,12,12,15,12,12,175,255,39,15,12,24,0,34,23,28,0,22,30,82,0,58,44,0,239],"Groceries":[614,9,155,194,414,354,592,432,483,248,195,581,976,1039,878,983,929,976,938,934,947,1201,1148,1136,1088,818,802,496,507,806,349,860,603,588,1002,1067,1008,724,896,859,871,1090,1156,965,969,1066,1026,1088,870,1466,1496],"Healthcare":[35,0,0,49,128,23,814,39,367,72,56,2194,625,1771,1058,13,2,300,1880,3042,265,3342,157,692,870,129,125,351,227,737,187,158,20,38,320,340,116,250,55,156,105,300,173,155,91,21,51,427,94,174,64],"Home Improvement":[66,51,1666,53,0,167,0,114,252,27,0,16086,120,39,271,455,114,19,187,183,142,202,27,513,370,83,0,950,112,147,58,12,0,93,0,0,86,0,10,349,77,94,527,51,0,55,70,44,0,53,56],"Housing":[2331,2331,2331,2331,2331,2331,2331,2421,2421,2421,2421,2412,2416,2412,2412,2412,2412,2412,2412,2412,2412,2412,2412,4788,0,2394,2394,2394,2524,2394,2394,2394,2394,2394,2394,2476,2476,2445,2445,2445,2445,2445,2445,2445,2445,2445,2445,2445,2385,2448,2448],"Kids":[0,0,0,0,0,0,41,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,630,0,0,0,0,0,0,0,0,82,0,0,0,0,30,42,0,0,0,0,0,0,776,88,50,0,0],"Other":[5,467,1385,125,5525,2099,688,199,2553,2621,305,15141,581,319,3118,342,290,295,1510,946,1730,504,151,30,99,45,1546,2132,146,92,296,419,438,0,937,113,0,8283,194,3191,200,25,975,1248,1400,0,200,350,1002,2376,1452],"Personal Care":[11,11,32,65,91,171,44,73,0,0,25,117,35,10,124,85,83,147,11,123,263,63,181,65,38,11,64,79,238,143,81,46,45,28,111,39,11,21,11,122,164,81,258,31,30,7,26,112,0,96,71],"Pets":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,564,529,629,681,438,192,226,181,203,121,480,297,645,317,0,101,150,285,607,179,300,88,288,59,453,231,388,320,240,910,76,173,552],"Shopping":[1396,192,630,714,772,1659,1332,1058,1130,845,507,1253,1076,536,1060,852,765,1036,1250,873,870,1470,974,1534,1218,730,1771,1436,1649,1735,1200,1336,901,1746,1603,3678,1827,1848,1989,2233,2119,1408,3323,1520,1681,1487,1690,2269,2267,1451,2469],"Travel":[0,1241,1373,94,0,0,0,90,0,1968,0,513,0,1504,130,693,22,1052,0,471,48,0,1738,0,756,0,31,472,0,0,0,0,27,257,0,0,0,0,0,0,0,112,0,293,41,77,689,379,0,0,1327],"Utilities":[313,285,512,265,251,416,186,202,414,150,139,840,326,328,484,299,238,495,269,303,539,358,424,637,355,359,706,238,401,534,552,365,665,528,392,978,467,507,770,371,352,596,428,361,697,347,400,576,418,276,788],"Work Expenses":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,46,93,97,66,74,145,91,36,50,73,27,0,5,44,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}};
+
+const STEVEN_TYPICAL=6800,AMY_TYPICAL=5600,TYPICAL_INCOME=12400;
+const CHILDCARE_CURRENT=1200; // current childcare for existing kid(s)
+const DAYCARE_INFANT=1400; // NJ center-based infant daycare ~$1,200-1,600
+const CHILD2_INCREMENTAL=400; // incremental cost of 2nd child when Amy is home (diapers, food, clothes, gear)
+const MILLTOWN_ZILLOW=540000, MILLTOWN_MORTGAGE_BAL=308000;
+const MILLTOWN_RENT_EST=3200;
+const MILLTOWN_CURRENT_PAYMENT=2445;
+let HOUSE_FUND=164000;
+let milltownMode='sell';
+
+// Town data: name, effective tax rate, school grade, school rank, notes
+const TOWNS=[
+  {id:'south-brunswick',name:'South Brunswick',rate:1.94,grade:'A+',rank:14,notes:'Familiar area, A+ schools, best value for family homes at $600K'},
+  {id:'cranbury',name:'Cranbury',rate:1.45,grade:'A+',rank:14,notes:'Lowest taxes, SB schools — but median home ~$995K, slim pickings at $600K'},
+  {id:'east-brunswick',name:'East Brunswick',rate:2.29,grade:'A+',rank:11,notes:'Blue Ribbon schools, right next to South Brunswick'},
+  {id:'hillsborough',name:'Hillsborough',rate:2.09,grade:'A',rank:22,notes:'More house for the money, strong schools, ~25 min from SB'},
+  {id:'plainsboro',name:'Plainsboro',rate:2.29,grade:'A+',rank:2,notes:'WW-P schools (#2 in NJ) at Middlesex County tax rates'},
+  {id:'west-windsor',name:'West Windsor',rate:2.88,grade:'A+',rank:2,notes:'Top-ranked WW-P schools but highest taxes in the area'},
+];
+let selectedTown=TOWNS[0]; // default South Brunswick
+
+const VOLATILE=['Financial','Education','Other','Work Expenses'];
+const CC={'Housing':'#60A5FA','Groceries':'#34D399','Dining':'#FB923C','Auto & Transport':'#F87171','Utilities':'#A78BFA','Shopping':'#FBBF24','Entertainment':'#38BDF8','Healthcare':'#2DD4BF','Pets':'#F472B6','Travel':'#818CF8','Kids':'#FB7185','Home Improvement':'#4ADE80','Personal Care':'#E879F9','Gifts':'#34D399','Financial':'#64748B','Education':'#64748B','Other':'#475569','Work Expenses':'#475569'};
+
+// Federal tax (MFJ 2025 brackets)
+function fedTaxMFJ(agi){const std=30000,t=Math.max(0,agi-std);let tax=0;const b=[[23200,.10],[71400,.12],[100000,.22],[200000,.24]];let p=0;for(const[l,r]of b){if(t<=p)break;const c=Math.min(t,l)-p;if(c>0)tax+=c*r;p=l}if(t>200000)tax+=(t-200000)*.32;return tax}
+// NJ state tax
+function njTax(agi){const t=Math.max(0,agi-1000);let tax=0;const b=[[20000,.014],[35000,.0175],[40000,.035],[75000,.05525],[500000,.0637]];let p=0;for(const[l,r]of b){if(t<=p)break;const c=Math.min(t,l)-p;if(c>0)tax+=c*r;p=l}if(t>500000)tax+=(t-500000)*.0897;return tax}
+// Monthly take-home from gross annual, given 401k%, biweekly health ins premium
+function monthlyNet(gross,retPct,healthBiweekly){const ret=gross*retPct;const hlth=healthBiweekly*26;const agi=gross-ret-hlth;const fed=fedTaxMFJ(agi);const nj=njTax(agi);const fica=Math.min(gross,168600)*.0765;return(gross-ret-hlth-fed-nj-fica)/12}
+
+let rangeN=12;
+function getR(){const t=RAW.months.length,n=rangeN===0?t:Math.min(rangeN,t),s=t-n;return{s,n,l:RAW.labels.slice(s),i:RAW.income.slice(s),sp:RAW.spending.slice(s)}}
+function getC(s){const o={};for(const[c,v]of Object.entries(RAW.categories))o[c]=v.slice(s);return o}
+function changeRange(){rangeN=parseInt(document.getElementById('rangeSelect').value);refreshAll()}
+function go(id,b){document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));document.getElementById(id).classList.add('on');b.classList.add('on')}
+function tgl(e){e.classList.toggle('on')}
+function isOn(id){return document.getElementById(id).classList.contains('on')}
+function fmt(n){return(n<0?'−':'')+'$'+Math.abs(Math.round(n)).toLocaleString()}
+function avg(a){return a.length?a.reduce((s,v)=>s+v,0)/a.length:0}
+function pv(s){return parseFloat((s||'0').replace(/[^0-9.-]/g,''))||0}
+
+function setTown(id){
+  selectedTown=TOWNS.find(t=>t.id===id)||TOWNS[0];
+  buildTownBtns(); // rebuild to update highlight + dollar amounts
+  const hp=pv(document.getElementById('sHP').value)||600000;
+  const annualTax=hp*selectedTown.rate/100;
+  document.getElementById('townInfo').innerHTML=`<strong>${selectedTown.name}</strong> · ${selectedTown.grade} schools (#${selectedTown.rank} in NJ)<br>Est. property tax on ${fmt(hp)} home: <strong style="color:var(--green)">${fmt(annualTax)}/yr</strong> (${fmt(annualTax/12)}/mo) · effective rate ${selectedTown.rate}%<br><span style="color:var(--text3)">${selectedTown.notes}</span>`;
+  updateSc();
+}
+function buildTownBtns(){
+  const hp=pv(document.getElementById('sHP')?.value)||600000;
+  const c=document.getElementById('townBtns');
+  c.innerHTML=TOWNS.map(t=>{
+    const annual=hp*t.rate/100;
+    const sel=t.id===selectedTown.id;
+    return`<button class="town-btn" data-town="${t.id}" onclick="setTown('${t.id}')" style="padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:${sel?'var(--green)':'var(--surface2)'};color:${sel?'#0A0E17':'var(--text2)'};font-weight:700;font-size:11px;cursor:pointer;font-family:'DM Sans';line-height:1.4">${t.name}<br><span style="font-weight:400;opacity:0.8">${fmt(annual)}/yr</span></button>`
+  }).join('');
+}
+
+function setMilltown(mode){
+  milltownMode=mode;
+  ['btnSell','btnRent','btnNeither'].forEach(id=>{
+    const el=document.getElementById(id);
+    if((mode==='sell'&&id==='btnSell')||(mode==='rent'&&id==='btnRent')||(mode==='neither'&&id==='btnNeither')){
+      el.style.background='var(--green)';el.style.color='#0A0E17';
+    } else {
+      el.style.background='var(--surface2)';el.style.color='var(--text2)';
+    }
+  });
+  updateSc();
+}
+
+let ch={};
+const CD={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#5C6580',font:{family:'DM Sans',size:11}}}},scales:{x:{ticks:{color:'#5C6580',font:{family:'DM Sans',size:10},maxRotation:45},grid:{color:'#1C2438'}},y:{ticks:{color:'#5C6580',font:{family:'Geist Mono',size:10},callback:v=>'$'+v.toLocaleString()},grid:{color:'#1C2438'}}}};
+
+function buildTrend(){const r=getR(),ctx=document.getElementById('cTrend').getContext('2d');if(ch.t)ch.t.destroy();ch.t=new Chart(ctx,{type:'line',data:{labels:r.l,datasets:[{label:'Income',data:r.i,borderColor:'#34D399',backgroundColor:'rgba(52,211,153,0.06)',fill:true,tension:.3,pointRadius:2,borderWidth:2},{label:'Spending',data:r.sp,borderColor:'#FB7185',backgroundColor:'rgba(251,113,133,0.06)',fill:true,tension:.3,pointRadius:2,borderWidth:2}]},options:CD})}
+function buildRate(){const r=getR(),ctx=document.getElementById('cRate').getContext('2d');if(ch.r)ch.r.destroy();const rates=r.l.map((_,i)=>{const s=r.i[i]-r.sp[i];return r.i[i]>0?Math.round(s/r.i[i]*100):0});ch.r=new Chart(ctx,{type:'bar',data:{labels:r.l,datasets:[{data:rates,backgroundColor:rates.map(v=>v>=20?'rgba(52,211,153,0.5)':v>=0?'rgba(251,191,36,0.5)':'rgba(251,113,133,0.5)'),borderRadius:4,barPercentage:.7}]},options:{...CD,plugins:{legend:{display:false}},scales:{...CD.scales,y:{...CD.scales.y,ticks:{...CD.scales.y.ticks,callback:v=>v+'%'}}}}})}
+function buildCatDonut(){const r=getR(),cats=getC(r.s),ctx=document.getElementById('cCat').getContext('2d');if(ch.c)ch.c.destroy();const a=Object.entries(cats).filter(([c])=>!VOLATILE.includes(c)).map(([c,v])=>({n:c,a:avg(v)})).filter(x=>x.a>10).sort((a,b)=>b.a-a.a);ch.c=new Chart(ctx,{type:'doughnut',data:{labels:a.map(x=>x.n),datasets:[{data:a.map(x=>Math.round(x.a)),backgroundColor:a.map(x=>CC[x.n]||'#475569'),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom',labels:{color:'#5C6580',font:{family:'DM Sans',size:10},padding:10,boxWidth:10}}}}})}
+function buildCatList(){const r=getR(),cats=getC(r.s);const a=Object.entries(cats).filter(([c])=>!VOLATILE.includes(c)).map(([c,v])=>({n:c,a:avg(v)})).filter(x=>x.a>10).sort((a,b)=>b.a-a.a);const tot=a.reduce((s,x)=>s+x.a,0),mx=a[0]?.a||1;document.getElementById('catList').innerHTML=a.map(x=>{const p=(x.a/tot*100).toFixed(1),w=(x.a/mx*100).toFixed(0),col=CC[x.n]||'#475569';return`<div class="cr"><div class="cd" style="background:${col}"></div><div class="cn">${x.n}</div><div class="cb"><div class="cf" style="width:${w}%;background:${col}"></div></div><div class="ca">${fmt(x.a)}</div><div class="cp">${p}%</div></div>`}).join('')}
+function buildCatTrend(){const r=getR(),cats=getC(r.s),ctx=document.getElementById('cCatTrend').getContext('2d');if(ch.ct)ch.ct.destroy();const top=Object.entries(cats).filter(([c])=>!VOLATILE.includes(c)).map(([c,v])=>({n:c,v,t:v.reduce((a,b)=>a+b,0)})).sort((a,b)=>b.t-a.t).slice(0,6);ch.ct=new Chart(ctx,{type:'line',data:{labels:r.l,datasets:top.map(t=>({label:t.n,data:t.v,borderColor:CC[t.n]||'#475569',tension:.3,pointRadius:2,borderWidth:2,pointBackgroundColor:CC[t.n]||'#475569'}))},options:CD})}
+
+function updateKPIs(){const r=getR(),aI=avg(r.i),aS=avg(r.sp),aN=aI-aS,rate=aI>0?(aN/aI*100).toFixed(0):0;
+document.getElementById('kI').textContent=fmt(aI);document.getElementById('kIS').textContent=fmt(STEVEN_TYPICAL);document.getElementById('kIA').textContent=fmt(AMY_TYPICAL);
+document.getElementById('kS').textContent=fmt(aS);document.getElementById('kN').textContent=fmt(aN);document.getElementById('kN').style.color=aN>=0?'var(--green)':'var(--red)';
+document.getElementById('kNd').innerHTML=`<span class="badge ${rate>=15?'bg':rate>=0?'ba':'br'}">${rate}% savings rate</span>`;
+if(r.i.length>=2){const li=r.i.length-1,d=r.sp[li]-r.sp[li-1],dp=r.sp[li-1]>0?(d/r.sp[li-1]*100).toFixed(0):0;document.getElementById('kSd').innerHTML=`<span class="badge ${d<=0?'bg':'br'}">${d<=0?'↓':'↑'} ${Math.abs(dp)}% vs prior month</span>`}
+HOUSE_FUND=pv(document.getElementById('fundBal')?.value);const hp=pv(document.getElementById('sHP')?.value)||500000,dpP=(pv(document.getElementById('sDP')?.value)||20)/100,goal=hp*dpP,pct=Math.min(100,(HOUSE_FUND/goal*100)).toFixed(0);
+document.getElementById('kH').textContent=fmt(HOUSE_FUND);document.getElementById('kHd').innerHTML=`<span class="badge bb">${pct}% of ${fmt(goal)} down payment</span>`}
+
+function buildInsights(){const r=getR(),li=r.i.length-1,cats=getC(r.s),ins=[];
+if(li>0){const d=r.sp[li]-r.sp[li-1];if(d<-200)ins.push({i:'📉',t:`Spending dropped <strong>${fmt(Math.abs(d))}</strong> vs the prior month.`});else if(d>r.sp[li-1]*0.1)ins.push({i:'⚠️',t:`Spending jumped <strong>${fmt(d)}</strong> from last month — check the Spending tab.`})}
+if(li>5){const rec=[],pri=[];Object.entries(cats).filter(([c])=>!VOLATILE.includes(c)).forEach(([c,v])=>{rec.push(avg(v.slice(-3)));pri.push(avg(v.slice(-6,-3)))});const rA=rec.reduce((a,b)=>a+b,0),pA=pri.reduce((a,b)=>a+b,0);if(rA<pA*0.95)ins.push({i:'✅',t:`Core spending trending down: <strong>${fmt(pA)}/mo</strong> → <strong>${fmt(rA)}/mo</strong>.`});else if(rA>pA*1.05)ins.push({i:'📈',t:`Core spending trending up: <strong>${fmt(pA)}/mo</strong> → <strong>${fmt(rA)}/mo</strong>.`})}
+const sA=avg(cats['Shopping']||[]);if(sA>1400)ins.push({i:'🛍️',t:`Shopping averages <strong>${fmt(sA)}/mo</strong>. A 20% cut saves ~${fmt(sA*0.2)}/mo.`});
+HOUSE_FUND=pv(document.getElementById('fundBal')?.value);const goal=(pv(document.getElementById('sHP')?.value)||500000)*(pv(document.getElementById('sDP')?.value)||20)/100;
+if(HOUSE_FUND>=goal)ins.push({i:'🏠',t:`You've hit your ${fmt(goal)} down payment target! But remember closing costs and move-in expenses — check Scenarios.`});
+else{const ms=pv(document.getElementById('sMS')?.value)||2500;ins.push({i:'🏠',t:`<strong>${fmt(goal-HOUSE_FUND)}</strong> to go for down payment alone. Total cash needed is higher — see Scenarios tab.`})}
+if(!ins.length)ins.push({i:'✨',t:'Looking good — keep tracking!'});
+document.getElementById('insBox').innerHTML=ins.map(x=>`<div class="insight"><div class="ii">${x.i}</div><div>${x.t}</div></div>`).join('')}
+
+function updateSc(){
+  HOUSE_FUND=pv(document.getElementById('fundBal')?.value);
+  const hp=pv(document.getElementById('sHP').value);
+  const dpP=pv(document.getElementById('sDP').value)/100;
+  const mr=pv(document.getElementById('sMR').value)/100/12;
+  const ms=pv(document.getElementById('sMS').value);
+  const ccP=pv(document.getElementById('sCC').value)/100;
+  const moveIn=pv(document.getElementById('fMoveIn').value);
+
+  // === TOTAL CASH NEEDED ===
+  const downPay=hp*dpP;
+  const closingCosts=hp*ccP;
+  const totalCashNeeded=downPay+closingCosts+moveIn;
+
+  // === MILLTOWN EQUITY ===
+  const milltownEquity=MILLTOWN_ZILLOW-MILLTOWN_MORTGAGE_BAL; // ~$232K
+  const sellNetProceeds=milltownEquity*0.94; // ~6% agent fees
+  let availableCash=HOUSE_FUND;
+  let milltownMonthlyNet=0;
+  let milltownInfo='';
+
+  if(milltownMode==='sell'){
+    availableCash+=sellNetProceeds;
+    milltownInfo=`<strong>Sell:</strong> ~${fmt(sellNetProceeds)} net proceeds (${fmt(milltownEquity)} equity − 6% fees). Added to your house fund. Eliminates current ${fmt(MILLTOWN_CURRENT_PAYMENT)}/mo payment.`;
+  } else if(milltownMode==='rent'){
+    // Rental income minus current mortgage/costs
+    const rentalIncome=MILLTOWN_RENT_EST;
+    const mgmtFee=rentalIncome*0.08;
+    const insurance=150;
+    const maintenance=200;
+    const vacancy=rentalIncome*0.05; // 5% vacancy allowance
+    milltownMonthlyNet=rentalIncome-MILLTOWN_CURRENT_PAYMENT-mgmtFee-insurance-maintenance-vacancy;
+    milltownInfo=`<strong>Rent out:</strong> ~${fmt(MILLTOWN_RENT_EST)}/mo rent − ${fmt(MILLTOWN_CURRENT_PAYMENT)} mortgage − ${fmt(Math.round(mgmtFee))} mgmt (8%) − ${fmt(insurance)} insurance − ${fmt(maintenance)} maintenance − ${fmt(Math.round(vacancy))} vacancy = <strong>${fmt(milltownMonthlyNet)}/mo net</strong>`;
+  } else {
+    milltownInfo=`<strong>Keep both:</strong> You continue paying ${fmt(MILLTOWN_CURRENT_PAYMENT)}/mo on Milltown plus the new mortgage. Two housing payments.`;
+  }
+  document.getElementById('milltownInfo').innerHTML=milltownInfo;
+
+  // === MORTGAGE CALC (new home) ===
+  const loan=hp-downPay;
+  const n=360;
+  const mortPI=loan>0?loan*(mr*Math.pow(1+mr,n))/(Math.pow(1+mr,n)-1):0;
+  const propTaxMo=(hp*selectedTown.rate/100)/12;
+  const homeInsuranceMo=Math.round(hp*0.003/12);
+  const totalHousingMo=mortPI+propTaxMo+homeInsuranceMo;
+
+  // === TIME TO GOAL ===
+  const remaining=Math.max(0,totalCashNeeded-availableCash);
+  const months=remaining>0?Math.ceil(remaining/ms):0;
+
+  // === POST-PURCHASE CASH FLOW ===
+  const r=getR(),cats=getC(r.s);
+  const stevenGross=pv(document.getElementById('sGross').value)||140000;
+  const amyGross=pv(document.getElementById('sAmyGross').value)||85000;
+  const retPct=(pv(document.getElementById('s401k').value)||12)/100;
+  const includeAmy=!isOn('tSpouse');
+  
+  // Tax-adjusted take-home income
+  const stevenNet=monthlyNet(stevenGross, retPct, 200);
+  const amyNet=includeAmy ? monthlyNet(amyGross, 0.06, 100) : 0;
+  let mInc=stevenNet+amyNet;
+
+  let coreSpend=0;
+  Object.entries(cats).filter(([c])=>!VOLATILE.includes(c)).forEach(([c,v])=>{coreSpend+=avg(v.slice(-6))});
+  const housingAvg=avg((cats['Housing']||[]).slice(-6));
+  const diningAvg=avg((cats['Dining']||[]).slice(-6));
+  const shoppingAvg=avg((cats['Shopping']||[]).slice(-6));
+
+  // Remove current housing from core spend (we'll replace with new housing)
+  let nonHousingSpend=coreSpend-housingAvg;
+  let childcareSavings=0;
+  let childcareNewCost=0;
+
+  if(isOn('tSpouse')){
+    childcareSavings=CHILDCARE_CURRENT; // no more daycare for existing kid(s)
+    nonHousingSpend-=childcareSavings;
+  }
+  if(isOn('tChild')){
+    if(isOn('tSpouse')){
+      // Amy home: just incremental costs (diapers, food, clothes, gear)
+      childcareNewCost=CHILD2_INCREMENTAL;
+    } else {
+      // Amy working: need another daycare slot + incremental costs
+      childcareNewCost=DAYCARE_INFANT+200; // daycare + some extra supplies
+    }
+    nonHousingSpend+=childcareNewCost;
+  }
+  // Update child cost info text
+  const childInfo=document.getElementById('childCostInfo');
+  if(childInfo){
+    if(isOn('tSpouse')) childInfo.textContent=`+${fmt(CHILD2_INCREMENTAL)}/mo incremental (Amy home, no daycare needed)`;
+    else childInfo.textContent=`+${fmt(DAYCARE_INFANT+200)}/mo (${fmt(DAYCARE_INFANT)} daycare + ${fmt(200)} supplies)`;
+  }
+  if(isOn('tCut')){
+    nonHousingSpend-=(diningAvg+shoppingAvg)*0.4;
+  }
+
+  // Add milltown cost/income back
+  let milltownCFImpact=0;
+  if(milltownMode==='sell'){
+    // No Milltown payment, no current housing cost
+    milltownCFImpact=0;
+  } else if(milltownMode==='rent'){
+    milltownCFImpact=milltownMonthlyNet; // positive = income
+  } else {
+    // Keep both: still paying Milltown mortgage
+    milltownCFImpact=-MILLTOWN_CURRENT_PAYMENT;
+  }
+
+  const postCF=mInc-nonHousingSpend-totalHousingMo+milltownCFImpact;
+
+  // === RENDER RESULTS ===
+  document.getElementById('rTotal').textContent=fmt(totalCashNeeded);
+  document.getElementById('rTotalS').textContent=`${fmt(downPay)} down + ${fmt(closingCosts)} closing + ${fmt(moveIn)} move-in`;
+
+  document.getElementById('rMo').textContent=months===0?'Ready!':months+' mo';
+  const td=new Date();td.setMonth(td.getMonth()+months);
+  if(months===0) document.getElementById('rMos').textContent=`${fmt(availableCash)} available > ${fmt(totalCashNeeded)} needed`;
+  else document.getElementById('rMos').textContent=`Target: ${td.toLocaleDateString('en-US',{month:'short',year:'numeric'})} · ${fmt(availableCash)} available now`;
+
+  document.getElementById('rMt').textContent=fmt(totalHousingMo);
+  document.getElementById('rMts').textContent=`${fmt(mortPI)} P&I + ${fmt(propTaxMo)} tax + ${fmt(homeInsuranceMo)} ins`;
+
+  document.getElementById('rCF').textContent=fmt(postCF);
+  document.getElementById('rCF').style.color=postCF>=0?'var(--green)':'var(--red)';
+  document.getElementById('rCFs').textContent=postCF>=0?'Manageable ✓':'⚠ Spending would exceed income';
+
+  // === BREAKDOWN ===
+  let bk='';
+  bk+=`<div class="row income"><span>Steven take-home (${(retPct*100).toFixed(0)}% to 401k)</span><span>+${fmt(stevenNet)}</span></div>`;
+  if(includeAmy)bk+=`<div class="row income"><span>Amy take-home</span><span>+${fmt(amyNet)}</span></div>`;
+  else bk+=`<div class="row"><span style="color:var(--text3)">Amy (not working)</span><span style="color:var(--text3)">$0</span></div>`;
+  if(milltownMode==='rent')bk+=`<div class="row income"><span>Milltown rental net</span><span>${milltownMonthlyNet>=0?'+':''}${fmt(milltownMonthlyNet)}</span></div>`;
+  bk+=`<div class="row expense"><span>New home (P&I + tax + ins)</span><span>−${fmt(totalHousingMo)}</span></div>`;
+  if(milltownMode==='neither')bk+=`<div class="row expense"><span>Milltown mortgage (kept)</span><span>−${fmt(MILLTOWN_CURRENT_PAYMENT)}</span></div>`;
+  bk+=`<div class="row expense"><span>Non-housing spending</span><span>−${fmt(nonHousingSpend)}</span></div>`;
+  if(isOn('tSpouse'))bk+=`<div class="row income"><span>&nbsp;&nbsp;↳ Childcare savings (Amy home)</span><span>+${fmt(childcareSavings)}</span></div>`;
+  if(isOn('tChild'))bk+=`<div class="row expense"><span>&nbsp;&nbsp;↳ New child expenses</span><span>−${fmt(childcareNewCost)}</span></div>`;
+  if(isOn('tCut'))bk+=`<div class="row income"><span>&nbsp;&nbsp;↳ Dining/shopping cuts</span><span>+${fmt((diningAvg+shoppingAvg)*0.4)}</span></div>`;
+  bk+=`<div class="row total"><span>Net monthly cash flow</span><span style="color:${postCF>=0?'var(--green)':'var(--red)'}">${fmt(postCF)}</span></div>`;
+  document.getElementById('cfBreakdown').innerHTML=bk;
+
+  // === PROJECTION CHART ===
+  const ctx=document.getElementById('cProj').getContext('2d');if(ch.p)ch.p.destroy();
+  const lb=[],dt=[],gl=[];let bal=availableCash;const maxM=Math.max(months+6,24);
+  for(let i=0;i<=maxM;i++){lb.push(i===0?'Now':`Mo ${i}`);dt.push(bal);gl.push(totalCashNeeded);bal+=ms}
+  ch.p=new Chart(ctx,{type:'line',data:{labels:lb,datasets:[{label:'Savings',data:dt,borderColor:'#34D399',backgroundColor:'rgba(52,211,153,0.08)',fill:true,tension:.2,pointRadius:0,borderWidth:2},{label:'Total Cash Needed',data:gl,borderColor:'#FBBF24',borderDash:[8,4],pointRadius:0,borderWidth:2}]},options:CD});
+}
+
+// Upload
+const PAYCHECK_PAYEES=['newark beth','barnabas health','rwjbarnabas','nisource'];
+const SM={'home':'Housing','home:mortgage':'Housing','home:home improvement':'Home Improvement','home:furnishings':'Home Improvement','groceries':'Groceries','dining & drinks':'Dining','dining & drinks:restaurants':'Dining','dining & drinks:fast food':'Dining','dining & drinks:coffee shops':'Dining','dining & drinks:bars':'Dining','auto & transport':'Auto & Transport','auto & transport:gas & fuel':'Auto & Transport','auto & transport:car payment':'Auto & Transport','auto & transport:tolls':'Auto & Transport','utilities':'Utilities','utilities:internet & cable':'Utilities','utilities:gas & electric':'Utilities','utilities:phone':'Utilities','entertainment':'Entertainment','shopping':'Shopping','shopping:clothing':'Shopping','shopping:books':'Shopping','shopping:electronics':'Shopping','health':'Healthcare','health:pharmacy':'Healthcare','health:doctor':'Healthcare','kids':'Kids','kids:child care':'Kids','pets':'Pets','pets:pet food & supplies':'Pets','personal care':'Personal Care','travel':'Travel','travel:airfare':'Travel','gifts':'Gifts','charity & donations':'Gifts','education':'Education','financial':'Financial','work expenses':'Work Expenses','personal income':'Income','personal income:paycheck':'Income','personal income:bonus':'Income'};
+const SKIP=new Set(['Transfer','Credit Card Payment','TOTAL CHECKING','CREDIT CARD','Amy CREDIT CARD','Blue Cash Everyday®','Balance Adjustment']);
+function handleFile(f){if(!f)return;const rd=new FileReader();rd.onload=e=>{try{const lines=e.target.result.trim().split('\n'),hdr=lines[0].toLowerCase().replace(/\r/g,'').split(',').map(h=>h.trim().replace(/"/g,'')),dI=hdr.indexOf('date'),aI=hdr.indexOf('amount'),cI=hdr.indexOf('category'),eI=hdr.indexOf('exclusion'),pI=hdr.indexOf('payee');if(dI===-1||aI===-1)throw new Error('Need Date and Amount columns');let cnt=0,nm=new Set();for(let i=1;i<lines.length;i++){const cols=lines[i].replace(/\r/g,'').split(',').map(c=>c.trim().replace(/"/g,''));const cat=cI!==-1?cols[cI]:'';const payee=pI!==-1?cols[pI].toLowerCase():'';const excl=eI!==-1&&cols[eI]?.toLowerCase()==='yes';const amt=parseFloat(cols[aI]);if(isNaN(amt))continue;const isPaycheck=amt>0&&PAYCHECK_PAYEES.some(p=>payee.includes(p));if(!isPaycheck){if(excl)continue;if(SKIP.has(cat))continue}let dt;try{dt=new Date(cols[dI])}catch{continue}if(isNaN(dt))continue;const key=dt.toISOString().slice(0,7),lab=dt.toLocaleDateString('en-US',{month:'short'}).slice(0,3)+' '+dt.getFullYear().toString().slice(2);let mi=RAW.months.indexOf(key);if(mi===-1){RAW.months.push(key);RAW.labels.push(lab);RAW.income.push(0);RAW.spending.push(0);for(const c in RAW.categories)RAW.categories[c].push(0);mi=RAW.months.length-1;nm.add(lab)}if(amt>0){RAW.income[mi]+=amt}else{const mp=SM[cat.toLowerCase()]||(cat.split(':')[0]?SM[cat.split(':')[0].toLowerCase()]:null)||'Other';RAW.spending[mi]+=Math.abs(amt);if(!RAW.categories[mp])RAW.categories[mp]=new Array(RAW.months.length).fill(0);RAW.categories[mp][mi]+=Math.abs(amt)}cnt++}document.getElementById('upSt').style.display='block';document.getElementById('upSt').innerHTML=`<span class="badge bg">✓</span> <strong>${cnt}</strong> transactions. ${nm.size} new months.`;document.getElementById('dStat').textContent=`${RAW.months.length} months loaded. Updated ${new Date().toLocaleDateString()}.`;refreshAll()}catch(err){document.getElementById('upSt').style.display='block';document.getElementById('upSt').innerHTML=`<span class="badge br">Error</span> ${err.message}`}};rd.readAsText(f)}
+const dz=document.getElementById('dz');dz.addEventListener('dragover',e=>{e.preventDefault();dz.style.borderColor='var(--green)';dz.style.background='var(--green-bg)'});dz.addEventListener('dragleave',()=>{dz.style.borderColor='var(--border)';dz.style.background='none'});dz.addEventListener('drop',e=>{e.preventDefault();dz.style.borderColor='var(--border)';dz.style.background='none';handleFile(e.dataTransfer.files[0])});
+
+function refreshAll(){updateKPIs();buildInsights();buildTrend();buildRate();buildCatDonut();buildCatList();buildCatTrend();updateSc()}
+buildTownBtns();setTown('south-brunswick');
+refreshAll();
+</script>
+</body>
+</html>
